@@ -38,6 +38,7 @@ class Country(Document):
         # self.Renewable_Percentage = renewable_p
         # self.Fossil_Fuel_Percentage = fossil_p
 
+
 if __name__ == "__main__":
     c2 = Country(Name="Caldari")
 
