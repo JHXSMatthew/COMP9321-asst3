@@ -16,8 +16,8 @@ def create_country_objects():
 
     for country in response_list:
         if country['region']['id'] != 'NA':
-            region = country['region']['value']
-            capital_city = country['capitalCity']
+            # region = country['region']['value']
+            # capital_city = country['capitalCity']
             country = Country(Name=country['name'])
             countries.append(country)
 
@@ -35,7 +35,7 @@ def get_indicator_values(indicator, object_value, countries):
     '''
 
     api_url = 'http://api.worldbank.org/v2/countries/all/indicators/'
-    url = api_url+indicator+'?format=json&date=1950:2016&per_page=5000'
+    url = api_url+indicator+'?format=json&date=1950:2016&per_page=20000'
     response = requests.get(url, params=None)
     response_list = response.json()[1]
     for country in response_list:
@@ -44,15 +44,18 @@ def get_indicator_values(indicator, object_value, countries):
             name = country['country']['value']
             year = country['date']
             value = country['value']
+            if value is None:
+                value = -1
             # Check if country object exists
 
             for country_object in countries:
                 if country_object.Name == name:
                     country_object[object_value].append([year, value])
+                    break
     return countries
 
 
-def create_final_list():
+def create_countries_list():
     '''
 
     :return:
@@ -65,7 +68,9 @@ def create_final_list():
     countries = create_country_objects()
 
     for indicator in indicator_values:
-        countries = get_indicator_values(indicator[0], indicator[1])
+        countries = get_indicator_values(indicator[0], indicator[1], countries)
+    return countries
 
 
-create_final_list()
+countries_test = create_countries_list()
+print("end")
