@@ -30,7 +30,7 @@ def download_data():
 @app.route('/countrylist', methods=['GET'])
 def return_all_data():
     # Return all data in MongoDB database
-    counties = mongo.db.framework
+    counties = mongo.db.collection_name
     output = []
     for q in counties.find():
         output.append({'name': q.Name})
@@ -38,11 +38,22 @@ def return_all_data():
 
 
 @app.route('/countrylist', methods=['GET'])
-def return_country_data(country):
+def return_country_data():
     # Return data in MongoDB database for specific country
 
     return 'Hello World'
 
+
+@app.route('/countrylist/<country>', methods=['GET'])
+def return_one_country(country):
+    countries = mongo.db.collection_name
+    q = countries.find_one({'country': country})
+
+    if q:
+        output = {}
+    else:
+        output ='No results found'
+    return jsonify(output)
 
 if __name__ == '__main__':
     app.run(debug=True)
