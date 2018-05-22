@@ -20,12 +20,12 @@ def create_country_objects():
         if country['region']['id'] != 'NA':
             # region = country['region']['value']
             # capital_city = country['capitalCity']
+
             country = Country(Name=country['name'], id=country_id)
             country_id += 1
             countries.append(country)
 
     return countries
-
 
 # Generic parsing for values
 def get_indicator_values(indicator, object_value, countries):
@@ -78,3 +78,4 @@ def create_countries_list():
         countries = get_indicator_values(indicator[0], indicator[1], countries)
 
     return countries
+
