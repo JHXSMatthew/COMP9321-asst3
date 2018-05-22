@@ -1,5 +1,5 @@
 import requests
-from data_publication.db_objects import Country
+from data_publication.db_objects import Country, Year
 
 
 def create_country_objects():
@@ -14,15 +14,17 @@ def create_country_objects():
     response = requests.get(general_info_url, params=None)
     response_list = response.json()[1]
 
+    country_id = 1
+
     for country in response_list:
         if country['region']['id'] != 'NA':
             # region = country['region']['value']
             # capital_city = country['capitalCity']
-            country = Country(Name=country['name'])
+            country = Country(Name=country['name'], id=country_id)
+            country_id += 1
             countries.append(country)
 
     return countries
-
 
 
 # Generic parsing for values
@@ -36,21 +38,26 @@ def get_indicator_values(indicator, object_value, countries):
 
     api_url = 'http://api.worldbank.org/v2/countries/all/indicators/'
     url = api_url+indicator+'?format=json&date=1950:2016&per_page=20000'
+
     response = requests.get(url, params=None)
     response_list = response.json()[1]
+
     for country in response_list:
         if country['countryiso3code'] is not "":
 
             name = country['country']['value']
-            year = country['date']
+            year = int(country['date'])
             value = country['value']
+
             if value is None:
                 value = -1
             # Check if country object exists
 
             for country_object in countries:
+
                 if country_object.Name == name:
-                    country_object[object_value].append([year, value])
+                    year_object = Year(year, value)
+                    country_object[object_value].append(year_object)
                     break
     return countries
 
@@ -69,8 +76,5 @@ def create_countries_list():
 
     for indicator in indicator_values:
         countries = get_indicator_values(indicator[0], indicator[1], countries)
+
     return countries
-
-
-countries_test = create_countries_list()
-print("end")
