@@ -14,15 +14,16 @@ def create_country_objects():
     response = requests.get(general_info_url, params=None)
     response_list = response.json()[1]
 
+
     for country in response_list:
-        if country['region']['id'] != 'NA':
+        # if country['region']['id'] != 'NA':
             # region = country['region']['value']
             # capital_city = country['capitalCity']
-            country = Country(Name=country['name'])
-            countries.append(country)
+        country = Country(Name=country['name'])
+
+        countries.append(country)
 
     return countries
-
 
 
 # Generic parsing for values
@@ -72,5 +73,12 @@ def create_countries_list():
     return countries
 
 
-countries_test = create_countries_list()
-print("end")
+# countries_test = create_countries_list()
+# # print(countries_test)
+# num = 1
+# # for country in countries_test:
+# #
+# #     print(num, ' ', country.Name,' ', country.year)
+# print(countries_test[0].__dict__)
+# # print(len(countries_test))
+# print("end")
