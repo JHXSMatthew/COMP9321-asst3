@@ -1,5 +1,5 @@
 import requests
-from db_objects import Country, Year
+from data_publication.db_objects import Country, Year
 
 
 def create_country_objects():
