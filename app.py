@@ -1,6 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from mongoengine import connect
-from flask_pymongo import PyMongo
+import db_objects
 from collections import OrderedDict
 import requests
 
@@ -10,50 +10,50 @@ app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'comp9321_project'
 app.config['MONGO_URI'] = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
 
-mongo = PyMongo(app)
 
 ############################################################### GET METHOD #############################################
 
-class Indicator:
-    def __init__(self, name, unit, unit_detail):
-        self.name = name
-        self.unit = unit
-        self.unit_detail = unit_detail
 
-class Indicators:
-    POP = Indicator("Population", "k", "thousands")
-    CO2 = Indicator("CO2", "kt", "kilotons")
-    CH4 = Indicator("CH2", "kt", "kilotons of CO2 equivalent")
-    GNI = Indicator("GNI", "USD", "US dollars")
-    GINI = Indicator("GINI", "NA", "NA")
-    AGRI = Indicator("Agricultural Land", "% of land area", "NA")
-    RENEWABLE = Indicator("Renewable Energy Consumption", "% of total final energy consumption", "NA")
-    FOSSIL_FUEL = Indicator("Fossil Fuel Energy Consumption", "% of total final energy consumption", "NA")
+@app.route('/api/<string:country>', methods=['GET'])
+def get_indicator(country):
+    connect(
+        host='mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+    )
 
+    c = db_objects.Country.objects(Name=country)[0]
 
-def get_indicator_ranking(country, indicator):
-    countries = mongo.db.country
+    start_year = db_objects.STARTING_YEAR
+    end_year = db_objects.ENDING_YEAR
+    indicators = []
 
-    c = countries.find_one({'Name':country})
+    if 'year' in request.args:
+        start_year = int(request.args.get('year'))
+        end_year = int(request.args.get('year'))
+    elif 'start_year' in request.args and 'end_year' in request.args:
+        start_year = int(request.args.get('start_year'))
+        end_year = int(request.args.get('end_year'))
 
+    if 'indicator' in request.args:
+        indicators = request.args.getlist('indicator')
 
-
-
+    return jsonify({
+        'result': c.to_dict(indicators, start_year, end_year)})
 
 @app.route('/')
 def hello_world():
     return 'Hello World!'
 
 
-@app.route('/data', methods=['GET'])
+@app.route('/api/all', methods=['GET'])
 def get_all_data():
     # Return all countries data in MongoDB database
+    connect(
+        host='mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+    )
 
-    countries = mongo.db.country
     output = []
-    for country in countries.find():
+    for country in db_objects.Country.objects:
         output.append({
-            'id': country['_id'],
             'Name': country['Name'],
             'Population': country['Population'],
             'CO2': country['CO2'],
@@ -105,129 +105,14 @@ def get_all_countries():
     return jsonify({'result': output})
 
 
-@app.route('/data/population', methods=['GET'])
-def get_all_population():
-    # Return all population in MongoDB database
-    counties = mongo.db.country
-    output = []
-    for country in counties.find():
-        output.append({
-            'id': country['_id'],
-            'Country': country['Name'],
-            'Population': country['Population']
-        })
-    return jsonify({'result': output})
-
-
-@app.route('/data/co2', methods=['GET'])
-def get_all_co2():
-    # Return all CO2 in MongoDB database
-    counties = mongo.db.country
-    output = []
-    for country in counties.find():
-        output.append({
-            'id': country['_id'],
-            'Country': country['Name'],
-            'CO2': country['CO2']
-        })
-    return jsonify({'result': output})
-
-
-@app.route('/data/ch4', methods=['GET'])
-def get_all_ch4():
-    # Return all CH4 in MongoDB database
-    counties = mongo.db.country
-    output = []
-    for country in counties.find():
-        output.append({
-            'id': country['_id'],
-            'Country': country['Name'],
-            'CH4': country['CH4']
-
-        })
-    return jsonify({'result': output})
-
-
-@app.route('/data/gni', methods=['GET'])
-def get_all_gni():
-    # Return all population in MongoDB database
-    counties = mongo.db.country
-    output = []
-    for country in counties.find():
-        output.append({
-            'id': country['_id'],
-            'Country': country['Name'],
-            'GNI': country['GNI']
-
-        })
-    return jsonify({'result': output})
-
-
-@app.route('/data/gini', methods=['GET'])
-def get_all_gini():
-    # Return all population in MongoDB database
-    counties = mongo.db.country
-    output = []
-    for country in counties.find():
-        output.append({
-            'id': country['_id'],
-            'Country': country['Name'],
-            'GINI': country['GINI']
-
-        })
-    return jsonify({'result': output})
-
-
-@app.route('/data/a_p', methods=['GET'])
-def get_all_ap():
-    # Return all population in MongoDB database
-    counties = mongo.db.country
-    output = []
-    for country in counties.find():
-        output.append({
-            'id': country['_id'],
-            'Country': country['Name'],
-            'Agriculture_Percentage': country['Agriculture_Percentage']
-        })
-    return jsonify({'result': output})
-
-
-@app.route('/data/r_p', methods=['GET'])
-def get_all_rp():
-    # Return all population in MongoDB database
-    counties = mongo.db.country
-    output = []
-    for country in counties.find():
-        output.append({
-            'id': country['_id'],
-            'Country': country['Name'],
-            'Renewable_Percentage': country['Renewable_Percentage']
-
-        })
-    return jsonify({'result': output})
-
-
-@app.route('/data/f_f_p', methods=['GET'])
-def get_all_ffp():
-    # Return all population in MongoDB database
-    counties = mongo.db.country
-    output = []
-    for country in counties.find():
-        output.append({
-            'id': country['_id'],
-            'Country': country['Name'],
-            'Fossil_Fuel_Percentage': country['Fossil_Fuel_Percentage']
-
-        })
-    return jsonify({'result': output})
-
-
 ############################################################### POST METHOD ############################################
 
 @app.route('/data', methods=['POST'])
 def download_data():
     # Get world bank data
     countries = create_countries_list()
+
+
 
     # Get NASA data
 
