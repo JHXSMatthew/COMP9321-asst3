@@ -337,7 +337,6 @@ def get_indicator_details(indicator):
 
 
 
->>>>>>> 048788f09b8ef61e7ca0d1c8fc1cb690ef115416
 ############################################################### POST METHOD ############################################
 
 @app.route('/data', methods=['POST'])
