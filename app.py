@@ -4,7 +4,7 @@ from flask_pymongo import PyMongo
 from collections import OrderedDict
 import requests
 
-from data_publication.world_bank import create_countries_list
+from world_bank import create_countries_list
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'comp9321_project'
