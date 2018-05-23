@@ -25,6 +25,7 @@ class Country(Document):
     Population = ListField(EmbeddedDocumentField(Year))
     CO2 = ListField(EmbeddedDocumentField(Year))
     CH4 = ListField(EmbeddedDocumentField(Year))
+    CH4_CO2 = ListField(EmbeddedDocumentField(Year))
     GNI = ListField(EmbeddedDocumentField(Year))
     GINI = ListField(EmbeddedDocumentField(Year))
     Agriculture_Percentage = ListField(EmbeddedDocumentField(Year))
