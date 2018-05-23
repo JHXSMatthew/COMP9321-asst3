@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from mongoengine import connect
 from flask_pymongo import PyMongo
 from collections import OrderedDict
+import requests
 
 from world_bank import create_countries_list
 
@@ -13,16 +14,47 @@ mongo = PyMongo(app)
 
 ############################################################### GET METHOD #############################################
 
+class Indicator:
+    def __init__(self, name, unit, unit_detail):
+        self.name = name
+        self.unit = unit
+        self.unit_detail = unit_detail
+
+class Indicators:
+    POP = Indicator("Population", "k", "thousands")
+    CO2 = Indicator("CO2", "kt", "kilotons")
+    CH4 = Indicator("CH2", "kt", "kilotons of CO2 equivalent")
+    GNI = Indicator("GNI", "USD", "US dollars")
+    GINI = Indicator("GINI", "NA", "NA")
+    AGRI = Indicator("Agricultural Land", "% of land area", "NA")
+    RENEWABLE = Indicator("Renewable Energy Consumption", "% of total final energy consumption", "NA")
+    FOSSIL_FUEL = Indicator("Fossil Fuel Energy Consumption", "% of total final energy consumption", "NA")
+
+
+def get_indicator_ranking(country, indicator):
+    countries = mongo.db.country
+
+    c = countries.find_one({'Name':country})
+
+
+
+
+
+@app.route('/')
+def hello_world():
+    return 'Hello World!'
+
+
 @app.route('/data', methods=['GET'])
 def get_all_data():
     # Return all countries data in MongoDB database
 
-    counties = mongo.db.country
+    countries = mongo.db.country
     output = []
-    for country in counties.find():
+    for country in countries.find():
         output.append({
             'id': country['_id'],
-            'Country': country['Name'],
+            'Name': country['Name'],
             'Population': country['Population'],
             'CO2': country['CO2'],
             'CH4': country['CH4'],
