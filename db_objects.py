@@ -76,12 +76,20 @@ class Country(Document):
         return r
 
     def get_values_list(self, indicator, start_year, end_year):
+        '''
+        year = end_year - index
+        list is in reverse order (from end year to start year)
+        :param indicator:
+        :param start_year:
+        :param end_year:
+        :return:
+        '''
         data = []
-        if getattr(self, indicator) is []:
-            output = {'start_year': start_year, 'end_year': end_year, 'data': []}
+        if getattr(self, indicator) == []:
+            data = [-1] * (end_year-start_year)
         else:
             [data.append(yr.Value) for yr in getattr(self, indicator ) if start_year <= yr.Year <= end_year]
-            output = {'start_year':start_year, 'end_year':end_year, 'data':data}
+        output = {'start_year': start_year, 'end_year': end_year, 'data': data}
 
         return output
 
