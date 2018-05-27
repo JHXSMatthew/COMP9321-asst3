@@ -204,8 +204,6 @@ def get_all_countries():
     return jsonify({'result': output})
 
 
-<<<<<<< HEAD
-=======
 @app.route('/data/population', methods=['GET'])
 def get_all_population():
     # Return all population in MongoDB database
