@@ -20,10 +20,11 @@ def create_country_objects():
         if country['region']['id'] != 'NA':
             # region = country['region']['value']
             # capital_city = country['capitalCity']
-
+            print('fetching - ' + str(country['name']))
             country = Country(Name=country['name'], id=country_id)
             country_id += 1
             countries.append(country)
+    print('country done. ')
 
     return countries
 
@@ -75,6 +76,7 @@ def create_countries_list():
     countries = create_country_objects()
 
     for indicator in indicator_values:
+        print('fetching indicator ' + str(indicator))
         countries = get_indicator_values(indicator[0], indicator[1], countries)
 
     return countries

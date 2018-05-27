@@ -4,16 +4,20 @@ import db_objects
 import five_number_summary
 from collections import OrderedDict
 import requests
+from flask_cors import CORS
 
 from world_bank import create_countries_list
 
+# CONNECTION_STRING = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+CONNECTION_STRING = 'mongodb://127.0.0.1:27017/test'
+
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'comp9321_project'
-app.config['MONGO_URI'] = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+app.config['MONGO_URI'] = CONNECTION_STRING
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 PUBLICATION_URL = "https://127.0.0.1"
 PUBLICATION_PORT = 9998
-
 
 
 ############################################################ Indicator Info ############################################
@@ -112,15 +116,34 @@ f_f_p = {
 
 
 
-
+connect(
+        host=CONNECTION_STRING
+)
 
 ############################################################### GET METHOD #############################################
+
+cache_country_list = None
+@app.route('/api/countries', methods=['GET'])	
+def get_all_countries():
+    # Return all countries in MongoDB database	
+    global cache_country_list
+    
+    if not cache_country_list:
+        output = []	
+        for country in db_objects.Country.objects:	
+            output.append({	
+                'id': country['id'],	
+                'Country': country['Name'],	
+            })	
+        cache_country_list = jsonify({'result': output})
+    return cache_country_list
+	
 
 
 @app.route('/api/<string:country>', methods=['GET'])
 def get_indicator(country):
     connect(
-        host='mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+        host=CONNECTION_STRING
     )
 
     c = db_objects.Country.objects(Name=country)[0]
@@ -151,7 +174,7 @@ def hello_world():
 def get_all_data():
     # Return all countries data in MongoDB database
     connect(
-        host='mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+        host=CONNECTION_STRING
     )
 
     output = []
@@ -224,6 +247,7 @@ def get_country_analysis(country, indicator):
 @app.route('/data', methods=['POST'])
 def download_data():
     # Get world bank data
+    print('on post - create country data')
     countries = create_countries_list()
 
 
@@ -232,7 +256,7 @@ def download_data():
 
     # Add to mongoDB database
     connect(
-        host='mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+        host=CONNECTION_STRING
     )
     for country in countries:
         country.save()
