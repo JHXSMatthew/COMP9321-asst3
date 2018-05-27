@@ -10,6 +10,9 @@ app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'comp9321_project'
 app.config['MONGO_URI'] = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
 
+PUBLICATION_URL = "https://127.0.0.1"
+PUBLICATION_PORT = 9998
+
 
 
 ############################################################ Indicator Info ############################################
@@ -356,4 +359,4 @@ def download_data():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=PUBLICATION_PORT)

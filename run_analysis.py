@@ -3,8 +3,6 @@ import requests
 
 app = Flask(__name__)
 
-PUBLICATION_URL = "https://127.0.0.1"
-PUBLICATION_PORT = 9998
 ANALYSIS_URL = "https://127.0.0.1"
 ANALYSIS_PORT = 9999
 
@@ -27,6 +25,6 @@ def get_country_list():
 
 
 if __name__ == '__main__':
-    app.run(port=ANALYSIS_PORT)
+    app.run(debug=True,port=ANALYSIS_PORT)
 
 
