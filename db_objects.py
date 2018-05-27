@@ -46,7 +46,7 @@ class Country(Document):
     GINI - gini index
     Agriculture_Percentage - percentage of land for agriculture
     """
-    #id = IntField(required=True, primary_key=True)
+    id = IntField(required=True, primary_key=True)
     Name = StringField(required=True, max_length=50)
     Population = ListField(EmbeddedDocumentField(Year))
     CO2 = ListField(EmbeddedDocumentField(Year))
@@ -62,11 +62,12 @@ class Country(Document):
         super(Country, self).__init__(*args, **kwargs)
 
     def to_dict(self, indicators, start_year, end_year):
+        global ALL_INDICATORS
         r = {
             'Name': self.Name
         }
 
-        if indicators is not []:
+        if indicators and len(indicators > 0):
             for i in indicators:
                 r[i] = [yr.to_dict() for yr in getattr(self, i) if start_year <= yr.Year <= end_year]
         else:
@@ -74,7 +75,7 @@ class Country(Document):
                 r[i] = [yr.to_dict() for yr in getattr(self, i) if start_year <= yr.Year <= end_year]
 
         return r
-
+    
     def get_values_list(self, indicator, start_year, end_year):
         '''
         year = end_year - index
