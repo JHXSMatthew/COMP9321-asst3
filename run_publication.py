@@ -123,8 +123,10 @@ connect(
 
 cache_country_list = None
 @app.route('/api/countries', methods=['GET'])	
-def get_all_countries():	
+def get_all_countries():
     # Return all countries in MongoDB database	
+    global cache_country_list
+    
     if not cache_country_list:
         output = []	
         for country in db_objects.Country.objects:	
