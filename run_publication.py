@@ -133,7 +133,7 @@ def get_all_countries():
                 'Country': country['Name'],	
             })	
         cache_country_list = jsonify({'result': output})
-    return 	cache_country_list
+    return cache_country_list
 	
 
 
