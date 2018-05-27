@@ -18,17 +18,19 @@ def get_five_num_sum(indicator, year):
     for country in db_objects.Country.objects:
         value_list = country.get_values_list(indicator, db_objects.STARTING_YEAR, db_objects.ENDING_YEAR)['data']
         value = value_list[get_index(year)]
-        if value is not -1:
+        if int(value) is not -1:
             values.append(value)
 
     values_sum = sum(values)
+    values_mean = values_sum/len(values)
+
     values.sort()
     min_value = values[0]
     max_value = values[len(values)-1]
     q1 = np.percentile(values, 25)
     q3 = np.percentile(values, 75)
     median_value = np.percentile(values, 50)
-    num_sum = {'min': min_value, 'q1': q1, 'median': median_value, 'q3': q3, 'max': max_value}
+    num_sum = {'min': min_value, 'q1': q1, 'median': median_value, 'q3': q3, 'max': max_value, 'sum': values_sum, 'mean': values_mean}
 
 
 

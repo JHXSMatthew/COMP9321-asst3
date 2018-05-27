@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from mongoengine import connect
 import db_objects
+import five_number_summary
 from collections import OrderedDict
 import requests
 
@@ -179,6 +180,42 @@ def get_indicator_details(indicator):
 
     })
     return jsonify({'result': output})
+
+
+@app.route('/analysis/<indicator>', methods=['GET'])
+def get_summary_for_indicator(indicator):
+    if 'year' in request.args:
+        year = int(request.args.get('year'))
+    else:
+        return jsonify({'Error' : 'Add year value as request argument'}), 400
+
+    output = five_number_summary.get_five_num_sum(indicator, year)
+
+    return jsonify(output), 200
+
+
+@app.route('/analysis/<country>/<indicator>', methods=['GET'])
+def get_country_analysis(country, indicator):
+    if 'year' in request.args:
+        year = int(request.args.get('year'))
+    else:
+        return jsonify({'Error' : 'Add year value as request argument'}), 400
+
+    indicator_summary = five_number_summary.get_five_num_sum(indicator, year)
+
+    connect(
+        host='mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+    )
+
+    c = db_objects.Country.objects(Name=country)[0]
+    values_list = c.get_values_list(indicator, db_objects.STARTING_YEAR, db_objects.ENDING_YEAR)
+
+    year_index = five_number_summary.get_index(year)
+    value = values_list['data'][year_index]
+
+    percent_of_total = (value/indicator_summary['sum']) * 100
+
+    return jsonify({'Indicator': indicator, 'Year': year, 'percent_of_total':percent_of_total}), 200
 
 
 
