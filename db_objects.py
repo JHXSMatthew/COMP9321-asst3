@@ -2,7 +2,7 @@ from mongoengine import connect, Document, StringField, IntField, FloatField, Li
 
 
 STARTING_YEAR = 1950
-ENDING_YEAR = 2015
+ENDING_YEAR = 2016
 
 class Indicator:
     def __init__(self, name, url_name, unit, unit_detail, details):
@@ -52,7 +52,7 @@ class Indicators:
                                         "Germany, Japan, the United Kingdom, and the United States). From 2001, these countries "
                                        "include the Euro area, Japan, the United Kingdom, and the United States."
                     )
-    GINI = Indicator("GINI", "", "NA", "NA",
+    GINI = Indicator("GINI", "", "", "",
                      'Gini index measures the extent to which the distribution of income (or, in some cases, '
                      'consumption expenditure) among individuals or households within an economy deviates from a'
                      ' perfectly equal distribution. A Lorenz curve plots the cumulative percentages of total income '
@@ -61,7 +61,7 @@ class Indicators:
                      'line of absolute equality, expressed as a percentage of the maximum area under the line. Thus'
                      ' a Gini index of 0 represents perfect equality, while an index of 100 implies perfect inequality.'
                      )
-    Agriculture_Percentage = Indicator("Agricultural Land", "Agriculture_Percentage", "% of land area", "NA",
+    Agriculture_Percentage = Indicator("Agricultural Land", "Agriculture_Percentage", "% of land area", "",
                                        "Agricultural land refers to the share of land area that is arable, under permanent crops, "
                                        "and under permanent pastures. Arable land includes land defined by the FAO as land under "
                                        "temporary crops (double-cropped areas are counted once), temporary meadows for mowing or for "
@@ -73,19 +73,29 @@ class Indicators:
                                     "Permanent pasture is land used for five or more years for forage, including natural and "
                                     "cultivated crops."
                      )
-    Renewable_Percentage = Indicator("Renewable Energy Consumption", "Renewable_Percentage", "% of total final energy consumption", "NA",
+    Renewable_Percentage = Indicator("Renewable Energy Consumption", "Renewable_Percentage", "% of total final energy consumption", "",
                           "Renewable energy consumption is the share of renewables "
                           "energy in total final energy consumption."
                           )
-    Fossil_Fuel_Percentage = Indicator("Fossil Fuel Energy Consumption", "Fossil_Fuel_Percentage", "% of total final energy consumption", "NA",
+    Fossil_Fuel_Percentage = Indicator("Fossil Fuel Energy Consumption", "Fossil_Fuel_Percentage", "% of total final energy consumption", "",
                             "Fossil fuel comprises coal, oil, petroleum, and natural gas products."
                             )
+
+    CO4_to_CO2_Ratio = Indicator("CO4 to CO2 Ratio", "CO4_to_CO2_Ratio", "%", "", "Ratio of CO4 to CO2, indicator of "
+                                                                                    "agricultural emmisions to other activities")
+
+    CO2_per_KCapita = Indicator("CO2 per Thousand Persons", "CO2_per_KCapita", "kt/Person(k)", "kiloton per thousand persons",
+                               "CO2 equivalent emmitted by thousand persons")
+
+    GNI_per_KCapita = Indicator("GNI per Thousand Persons", "GNI_per_KCapita", "USD/Person(k)", "USD per thousand perosns",
+                                "Gross Nation Income per thousand persons")
 
 
 
 
 ALL_INDICATORS = ["Population", "CO2", "CH4", "GNI", "GINI", "Agriculture_Percentage",
-                  "Renewable_Percentage", "Fossil_Fuel_Percentage"]
+                  "Renewable_Percentage", "Fossil_Fuel_Percentage", "CO4_to_CO2_Ratio", "CO2_per_KCapita",
+                  "GNI_per_KCapita"]
 
 
 class Year(EmbeddedDocument):

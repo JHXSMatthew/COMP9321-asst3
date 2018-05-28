@@ -63,7 +63,7 @@ def get_summary(start_year, end_year, indicators):
             country_count = len(values)
             if len(values) == 0:
                 values = [-1]
-            print(values, year)
+            #print(values, year)
             values_sum = sum(values)
             values.sort()
 
@@ -210,6 +210,9 @@ def download_data():
     for country in countries:
         country.save()
     return 'Hello World!'
+
+
+
 
 
 if __name__ == '__main__':
