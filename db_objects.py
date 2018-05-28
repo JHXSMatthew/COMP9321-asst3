@@ -8,14 +8,14 @@ class Indicator:
     def __init__(self, name, url_name, unit, unit_detail, details):
         self.name = name
         self.url_name = name
-        if url_name != "":
+        if url_name is not "":
             self.url_name = url_name
         self.unit = unit
         self.unit_detail = unit_detail
         self.details = details
 
     def to_dict(self):
-        return {
+         return {
             'Display_Name': self.name,
             'Name': self.url_name,
             'Unit': self.unit,
@@ -117,7 +117,6 @@ CALC_INDICATORS = {
     "GNI_per_KCapita": Calc_Indicator("GNI_per_KCapita", Calc_Indicator.ratio_lambda, ["GNI", "Population"])
 }
 
-
 class Year(EmbeddedDocument):
     Year = IntField(required=True, primary_key=True)
     Value = FloatField()
@@ -146,11 +145,15 @@ class Country(Document):
     Agriculture_Percentage = ListField(EmbeddedDocumentField(Year))
     Renewable_Percentage = ListField(EmbeddedDocumentField(Year))
     Fossil_Fuel_Percentage = ListField(EmbeddedDocumentField(Year))
+    CO4_to_CO2_Ratio = ListField(EmbeddedDocumentField(Year))
+    CO2_per_KCapita = ListField(EmbeddedDocumentField(Year))
+    GNI_per_KCapita = ListField(EmbeddedDocumentField(Year))
 
     def __init__(self, *args, **kwargs):
         super(Country, self).__init__(*args, **kwargs)
 
     def to_dict(self, indicators, start_year, end_year):
+        global ALL_INDICATORS
         r = {
             'Name': self.Name
         }
@@ -161,6 +164,9 @@ class Country(Document):
         for i in indicators:
             if i in CALC_INDICATORS.keys():
                 params = {}
+
+        if indicators and len(indicators) > 0:
+            for i in indicators:
 
                 ind = CALC_INDICATORS[i]
 
