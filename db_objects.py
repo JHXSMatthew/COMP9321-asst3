@@ -15,8 +15,9 @@ class Indicator:
         self.details = details
 
     def to_dict(self):
-        return {
-            'Name': self.name,
+         return {
+            'Display_Name': self.name,
+            'Name': self.url_name,
             'Unit': self.unit,
             'Unit_detail': self.unit_detail,
             'Details': self.details
