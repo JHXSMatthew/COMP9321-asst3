@@ -8,11 +8,15 @@ def get_ranking(year):
 
   ALL_INDICATORS = ["Population", "CO2", "CH4", "GNI", "GINI", "Agriculture_Percentage",
                     "Renewable_Percentage", "Fossil_Fuel_Percentage"]
+
+  cty = db_objects.Country.objects
+  for i in cty:
+      pass
   if year not in cache_rank:
     ranking = dict()
     for indicator in ALL_INDICATORS:
         temp =dict()
-        for country in db_objects.Country.objects:
+        for country in cty:
             value_list = country.get_values_list(indicator, year, year)['data']
             value = 0
             if len(value_list) == 1:
