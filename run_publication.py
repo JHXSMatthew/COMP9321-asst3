@@ -10,8 +10,8 @@ from flask_cors import CORS
 
 from world_bank import create_countries_list
 
-CONNECTION_STRING = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
-#CONNECTION_STRING = 'mongodb://127.0.0.1:27017/test'
+# CONNECTION_STRING = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+CONNECTION_STRING = 'mongodb://127.0.0.1:27017/test2'
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'comp9321_project'

@@ -2,7 +2,7 @@ from mongoengine import connect, Document, StringField, IntField, FloatField, Li
 from functools import reduce
 
 
-STARTING_YEAR = 1950
+STARTING_YEAR = 1960
 ENDING_YEAR = 2016
 
 class Indicator:
@@ -155,8 +155,6 @@ class Country(Document):
         r = {
             'Name': self.Name
         }
-
-        print(start_year, end_year)
 
         if indicators is None or len(indicators) == 0:
             indicators = ALL_INDICATORS
