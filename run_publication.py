@@ -35,32 +35,38 @@ def get_analysis():
     elif 'start_year' in request.args and 'end_year' in request.args:
         start_year = int(request.args.get('start_year'))
         end_year = int(request.args.get('end_year'))
+    else:
+        return {'err': "year/start_year/end_year required"}, 400
     if 'indicator' in request.args:
         indicators = request.args.getlist('indicator')
 
-        r = get_summary(indicators)
+        r = get_summary(start_year, end_year, indicators)
     else:
-        r = get_summary(db_objects.ALL_INDICATORS)
+        r = get_summary(start_year, end_year, db_objects.ALL_INDICATORS)
 
     return jsonify({
         'result': r})
 
 
-def get_summary(indicators):
+def get_summary(start_year, end_year, indicators):
     result = []
     for indicator in indicators:
-        year_values = [[(v.Year, v.Value, country.Name) for v in getattr(country, indicator) if v.Value != -1] for country in db_objects.Country.objects if country.Population != []]
+        year_values = [[(v.Year, v.Value, country.Name) for v in getattr(country, indicator) if start_year <= v.Year <= end_year]
+                       for country in db_objects.Country.objects if getattr(country, indicator) != []]
         results = {'indicator': indicator,
                    'summary': []}
 
         for years in list(zip(*year_values)):
             year = years[0][0]
-            values = [y[1] for y in years]
-            print(values)
+            values = list(filter(lambda x: x != -1, [y[1] for y in years]))
+            if len(values) == 0:
+                values = [-1]
+            print(values, year)
             values_sum = sum(values)
             values.sort()
+
             min_value = values[0]
-            max_value = values[len(values) - 1]
+            max_value = values[-1]
             q1 = np.percentile(values, 25)
             q3 = np.percentile(values, 75)
             median_value = np.percentile(values, 50)
