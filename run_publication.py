@@ -187,14 +187,14 @@ def get_all_data():
 #     return jsonify({'Indicator': indicator, 'Year': year, 'percent_of_total':percent_of_total}), 200
 
 
-@app.route('/analysis/ranking/<indicator>', methods=['GET'])
-def get_ranking_by_year(indicator):
+@app.route('/analysis/ranking', methods=['GET'])
+def get_ranking_by_year():
    if 'year' in request.args:
        year = int(request.args.get('year'))
    else:
        return jsonify({'Error' : 'Add year value as request argument'}), 400
 
-   output = ranking.get_ranking(indicator, year)
+   output = ranking.get_ranking(year)
    return jsonify(output), 200
 
 
