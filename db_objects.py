@@ -14,35 +14,43 @@ class Indicator:
         self.unit_detail = unit_detail
         self.details = details
 
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'unit': self.unit,
+            'unit_detail': self.unit_detail,
+            'details': self.details
+        }
+
 class Indicators:
-    POP = Indicator("Population", "", "k", "thousands",
-                    "Total population is based on the de facto definition of population, which counts all \
-                    residents regardless of legal status or citizenship. The values shown are midyear estimates."
+    Population = Indicator("Population", "", "k", "thousands",
+                    "Total population is based on the de facto definition of population, which counts all "
+                    "residents regardless of legal status or citizenship. The values shown are midyear estimates."
                     )
     CO2 = Indicator("CO2", "", "kt", "kilotons",
-                    "Carbon dioxide emissions are those stemming from the burning of fossil fuels \
-                                      and the manufacture of cement. They include carbon dioxide produced during \
-                                      consumption of solid, liquid, and gas fuels and gas flaring."
+                    "Carbon dioxide emissions are those stemming from the burning of fossil fuels "
+                                      "and the manufacture of cement. They include carbon dioxide produced during "
+                                      "consumption of solid, liquid, and gas fuels and gas flaring."
                     )
     CH4 = Indicator("CH4", "", "kt", "kilotons of CO2 equivalent",
-                    "Methane emissions are those stemming from human activities such as agriculture and from industrial \
-                                        methane production."
+                    "Methane emissions are those stemming from human activities such as agriculture and from industrial "
+                                        "methane production."
                     )
     GNI = Indicator("GNI", "", "USD", "US dollars",
-                    "GNI per capita (formerly GNP per capita) is the gross national income, converted \
-                                        to U.S. dollars using the World Bank Atlas method, divided by the midyear population. \
-                                        GNI is the sum of value added by all resident producers plus any product taxes (less \
-                                       subsidies) not included in the valuation of output plus net receipts of primary income \
-                                       (compensation of employees and property income) from abroad. GNI, calculated in national \
-                                        currency, is usually converted to U.S. dollars at official exchange rates for comparisons \
-                                        across economies, although an alternative rate is used when the official exchange rate is \
-                                        judged to diverge by an exceptionally large margin from the rate actually applied in \
-                                        international transactions. To smooth fluctuations in prices and exchange rates, a special \
-                                        Atlas method of conversion is used by the World Bank. This applies a conversion factor that \
-                                       averages the exchange rate for a given year and the two preceding years, adjusted for differences \
-                                        in rates of inflation between the country, and through 2000, the G-5 countries (France, \
-                                        Germany, Japan, the United Kingdom, and the United States). From 2001, these countries \
-                                       include the Euro area, Japan, the United Kingdom, and the United States."
+                    "GNI per capita (formerly GNP per capita) is the gross national income, converted "
+                                        "to U.S. dollars using the World Bank Atlas method, divided by the midyear population. "
+                                        "GNI is the sum of value added by all resident producers plus any product taxes (less "
+                                       "subsidies) not included in the valuation of output plus net receipts of primary income "
+                                       "(compensation of employees and property income) from abroad. GNI, calculated in national "
+                                        "currency, is usually converted to U.S. dollars at official exchange rates for comparisons "
+                                        "across economies, although an alternative rate is used when the official exchange rate is "
+                                        "judged to diverge by an exceptionally large margin from the rate actually applied in "
+                                        "international transactions. To smooth fluctuations in prices and exchange rates, a special "
+                                        "Atlas method of conversion is used by the World Bank. This applies a conversion factor that "
+                                       "averages the exchange rate for a given year and the two preceding years, adjusted for differences "
+                                        "in rates of inflation between the country, and through 2000, the G-5 countries (France, "
+                                        "Germany, Japan, the United Kingdom, and the United States). From 2001, these countries "
+                                       "include the Euro area, Japan, the United Kingdom, and the United States."
                     )
     GINI = Indicator("GINI", "", "NA", "NA",
                      'Gini index measures the extent to which the distribution of income (or, in some cases, '
@@ -53,25 +61,27 @@ class Indicators:
                      'line of absolute equality, expressed as a percentage of the maximum area under the line. Thus'
                      ' a Gini index of 0 represents perfect equality, while an index of 100 implies perfect inequality.'
                      )
-    AGRI = Indicator("Agricultural Land", "Agriculture_Percentage", "% of land area", "NA",
-                     "Agricultural land refers to the share of land area that is arable, under permanent crops, \
-                     and under permanent pastures. Arable land includes land defined by the FAO as land under \
-                     temporary crops (double-cropped areas are counted once), temporary meadows for mowing or for \
-                     pasture, land under market or kitchen gardens, and land temporarily fallow. Land abandoned as \
-                      a result of shifting cultivation is excluded. Land under permanent crops is land cultivated \
-                     with crops that occupy the land for long periods and need not be replanted after each harvest, \
-                      such as cocoa, coffee, and rubber. This category includes land under flowering shrubs, \
-                     fruit trees, nut trees, and vines, but excludes land under trees grown for wood or timber. \
-                     Permanent pasture is land used for five or more years for forage, including natural and \
-                     cultivated crops."
+    Agriculture_Percentage = Indicator("Agricultural Land", "Agriculture_Percentage", "% of land area", "NA",
+                                       "Agricultural land refers to the share of land area that is arable, under permanent crops, "
+                                       "and under permanent pastures. Arable land includes land defined by the FAO as land under "
+                                       "temporary crops (double-cropped areas are counted once), temporary meadows for mowing or for "
+                                       "pasture, land under market or kitchen gardens, and land temporarily fallow. Land abandoned as "
+                                       "a result of shifting cultivation is excluded. Land under permanent crops is land cultivated "
+                                       "with crops that occupy the land for long periods and need not be replanted after each harvest, "
+                                       "such as cocoa, coffee, and rubber. This category includes land under flowering shrubs, "
+                                       "fruit trees, nut trees, and vines, but excludes land under trees grown for wood or timber. "
+                                    "Permanent pasture is land used for five or more years for forage, including natural and "
+                                    "cultivated crops."
                      )
-    RENEWABLE = Indicator("Renewable Energy Consumption", "Renewable_Percentage", "% of total final energy consumption", "NA",
-                          "Renewable energy consumption is the share of renewables \
-                          energy in total final energy consumption."
+    Renewable_Percentage = Indicator("Renewable Energy Consumption", "Renewable_Percentage", "% of total final energy consumption", "NA",
+                          "Renewable energy consumption is the share of renewables "
+                          "energy in total final energy consumption."
                           )
-    FOSSIL_FUEL = Indicator("Fossil Fuel Energy Consumption", "Fossil_Fuel_Percentage", "% of total final energy consumption", "NA",
+    Fossil_Fuel_Percentage = Indicator("Fossil Fuel Energy Consumption", "Fossil_Fuel_Percentage", "% of total final energy consumption", "NA",
                             "Fossil fuel comprises coal, oil, petroleum, and natural gas products."
                             )
+
+
 
 
 ALL_INDICATORS = ["Population", "CO2", "CH4", "GNI", "GINI", "Agriculture_Percentage",

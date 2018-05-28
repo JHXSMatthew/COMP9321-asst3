@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 from mongoengine import connect
 import db_objects
 import numpy as np
+import five_number_summary
+import ranking
 from collections import OrderedDict
 import requests
 from flask_cors import CORS
@@ -18,40 +20,6 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 PUBLICATION_URL = "https://127.0.0.1"
 PUBLICATION_PORT = 9998
-
-
-############################################################ Indicator Info ############################################
-a_p = {
-    'Unit': '% of land area',
-    'Source': 'Food and Agriculture Organization, electronic files and web site',
-    'Definition':
-}
-
-r_p = {
-    'Unit': '% of total final energy consumption',
-    'Souece': ' World Bank, Sustainable Energy for All ( SE4ALL ) database from the SE4ALL Global Tracking '
-              'Framework led jointly by the World Bank, International Energy Agency, and the Energy Sector '
-              'Management Assistance Program.',
-    'Definition':
-}
-
-population ={
-    'Unit': 'Total',
-    'Source': '( 1 ) United Nations Population Division. World Population Prospects: 2017 Revision. '
-              '( 2 ) Census reports and other statistical publications from national statistical offices, '
-              '( 3 ) Eurostat: Demographic Statistics, '
-              '( 4 ) United Nations Statistical Division. Population and Vital Statistics Reprot ( various years ), '
-              '( 5 ) U.S. Census Bureau: International Database, and '
-              '( 6 ) Secretariat of the Pacific Community: Statistics and Demography Programme.',
-    'Definition':
-}
-
-f_f_p = {
-    'Unit': '% of total',
-    'Source': 'IEA Statistics ',
-    'Definition':
-}
-
 
 
 connect(
@@ -103,7 +71,7 @@ cache_country_list = None
 def get_all_countries():
     # Return all countries in MongoDB database
     global cache_country_list
-    
+
     if not cache_country_list:
         output = []	
         for country in db_objects.Country.objects:	
@@ -142,27 +110,58 @@ def get_indicator(country):
         'result': c.to_dict(indicators, start_year, end_year)})
 
 
+cache_all_country = None
 @app.route('/api/all', methods=['GET'])
 def get_all_data():
+    global cache_all_country
     # Return all countries data in MongoDB database
     # connect(
     #     host=CONNECTION_STRING
     # )
 
-    output = []
-    for country in db_objects.Country.objects:
-        output.append({
-            'Name': country['Name'],
-            'Population': country['Population'],
-            'CO2': country['CO2'],
-            'CH4': country['CH4'],
-            'GNI': country['GNI'],
-            'GINI': country['GINI'],
-            'Agriculture_Percentage': country['Agriculture_Percentage'],
-            'Renewable_Percentage': country['Renewable_Percentage'],
-            'Fossil_Fuel_Percentage': country['Fossil_Fuel_Percentage']
-        })
-    return jsonify({'result': output})
+    if not cache_all_country:
+        output = []
+        for country in db_objects.Country.objects:
+            output.append(country.to_dict([],db_objects.STARTING_YEAR,db_objects.ENDING_YEAR))
+        cache_all_country = jsonify({'result': output})
+    return cache_all_country
+
+
+
+@app.route('/analysis/<indicator>', methods=['GET'])
+def get_summary_for_indicator(indicator):
+    if 'year' in request.args:
+        year = int(request.args.get('year'))
+    else:
+        return jsonify({'Error' : 'Add year value as request argument'}), 400
+
+    output = five_number_summary.get_five_num_sum(indicator, year)
+
+    return jsonify(output), 200
+
+
+@app.route('/analysis/<country>/<indicator>', methods=['GET'])
+def get_country_analysis(country, indicator):
+    if 'year' in request.args:
+        year = int(request.args.get('year'))
+    else:
+        return jsonify({'Error' : 'Add year value as request argument'}), 400
+
+    indicator_summary = five_number_summary.get_five_num_sum(indicator, year)
+
+    connect(
+        host='mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+    )
+
+    c = db_objects.Country.objects(Name=country)[0]
+    values_list = c.get_values_list(indicator, db_objects.STARTING_YEAR, db_objects.ENDING_YEAR)
+
+    year_index = five_number_summary.get_index(year)
+    value = values_list['data'][year_index]
+
+    percent_of_total = (value/indicator_summary['sum']) * 100
+
+    return jsonify({'Indicator': indicator, 'Year': year, 'percent_of_total':percent_of_total}), 200
 
 @app.route('/api/details', methods=['GET'])
 def get_indicator_details():
@@ -176,7 +175,19 @@ def get_indicator_details():
     })
     return jsonify({'result': output})
 
+@app.route('/analysis/ranking/<indicator>', methods=['GET'])
+def get_ranking_by_year(indicator):
+   if 'year' in request.args:
+       year = int(request.args.get('year'))
+   else:
+       return jsonify({'Error' : 'Add year value as request argument'}), 400
 
+   output = ranking.get_ranking(indicator, year)
+   return jsonify(output), 200
+
+@app.route('/api/indicator', methods=['GET'])
+def get_indicator_list():
+    return jsonify({'result': [getattr(db_objects.Indicators, indicator).to_dict() for indicator in db_objects.ALL_INDICATORS]})
 
 ############################################################### POST METHOD ############################################
 
