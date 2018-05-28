@@ -1,4 +1,5 @@
 from mongoengine import connect, Document, StringField, IntField, FloatField, ListField, EmbeddedDocument, EmbeddedDocumentField
+from functools import reduce
 
 
 STARTING_YEAR = 1950
@@ -188,9 +189,12 @@ class Country(Document):
 
                 year = start_year
                 while year <= end_year:
-                    p = [params[p][year] for p in ind.params]
-                    v = ind.run(p)
-                    r[i].append({'year': year, 'value': v})
+
+                    if reduce((lambda x, y: x and y), map((lambda p: year in params[p]), ind.params)):
+                        p = [params[p][year] for p in ind.params]
+                        r[i].append({'year': year, 'value': ind.run(p)})
+                    else:
+                        r[i].append({'year': year, 'value': -1})
 
                     year += 1
 
