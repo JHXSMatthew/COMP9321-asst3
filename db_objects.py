@@ -95,7 +95,7 @@ class Indicators:
 
 
 ALL_INDICATORS = ["Population", "CO2", "CH4", "GNI", "GINI", "Agriculture_Percentage",
-                  "Renewable_Percentage", "Fossil_Fuel_Percentage", "CO4_to_CO2_Ratio", "CO2_per_KCapita",
+                  "Renewable_Percentage", "Fossil_Fuel_Percentage", "CH4_to_CO2_Ratio", "CO2_per_KCapita",
                   "GNI_per_KCapita"]
 
 class Calc_Indicator:
