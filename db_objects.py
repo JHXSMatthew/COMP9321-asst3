@@ -8,7 +8,7 @@ class Indicator:
     def __init__(self, name, url_name, unit, unit_detail, details):
         self.name = name
         self.url_name = name
-        if url_name is not "":
+        if url_name != "":
             self.url_name = url_name
         self.unit = unit
         self.unit_detail = unit_detail
@@ -16,7 +16,8 @@ class Indicator:
 
     def to_dict(self):
         return {
-            'Name': self.name,
+            'Display_Name': self.name,
+            'Name': self.url_name,
             'Unit': self.unit,
             'Unit_detail': self.unit_detail,
             'Details': self.details
@@ -97,6 +98,25 @@ ALL_INDICATORS = ["Population", "CO2", "CH4", "GNI", "GINI", "Agriculture_Percen
                   "Renewable_Percentage", "Fossil_Fuel_Percentage", "CO4_to_CO2_Ratio", "CO2_per_KCapita",
                   "GNI_per_KCapita"]
 
+class Calc_Indicator:
+    ratio_lambda = lambda x, y: x / y
+
+    def __init__(self, name, func, params=[]):
+        self.name = name
+        self.params = params
+        self.func = func
+
+    def run(self, params=[]):
+        return
+
+
+
+CALC_INDICATORS = {
+    "CO4_to_CO2_Ratio": [ratio_lambda],
+    "CO2_per_KCapita": [ratio_lambda],
+    "GNI_per_KCapita": [ratio_lambda]
+}
+
 
 class Year(EmbeddedDocument):
     Year = IntField(required=True, primary_key=True)
@@ -127,22 +147,19 @@ class Country(Document):
     Agriculture_Percentage = ListField(EmbeddedDocumentField(Year))
     Renewable_Percentage = ListField(EmbeddedDocumentField(Year))
     Fossil_Fuel_Percentage = ListField(EmbeddedDocumentField(Year))
-    CO4_to_CO2_Ratio = ListField(EmbeddedDocumentField(Year))
-    CO2_per_KCapita = ListField(EmbeddedDocumentField(Year))
-    GNI_per_KCapita = ListField(EmbeddedDocumentField(Year))
 
     def __init__(self, *args, **kwargs):
         super(Country, self).__init__(*args, **kwargs)
 
     def to_dict(self, indicators, start_year, end_year):
-        global ALL_INDICATORS
         r = {
             'Name': self.Name
         }
 
         if indicators and len(indicators) > 0:
             for i in indicators:
-                ##########if i == CO4 to co2 ratio etc:
+                if i in CALC_INDICATORS.values():
+
 
                 r[i] = [yr.to_dict() for yr in getattr(self, i) if start_year <= yr.Year <= end_year]
         else:
