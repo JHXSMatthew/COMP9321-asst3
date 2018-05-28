@@ -188,13 +188,24 @@ def get_all_data():
 
 @app.route('/analysis/ranking', methods=['GET'])
 def get_ranking_by_year():
-   if 'year' in request.args:
-       year = int(request.args.get('year'))
-   else:
-       return jsonify({'Error' : 'Add year value as request argument'}), 400
+  if 'year' in request.args:
+      year = int(request.args.get('year'))
+  else:
+      return jsonify({'Error' : 'Add year value as request argument'}), 400
 
-   output = ranking.get_ranking(year)
-   return jsonify(output), 200
+  output = ranking.get_ranking(year)
+  return jsonify(output), 200
+
+
+@app.route('/analysis/all_ranking', methods=['GET'])
+def get_all_ranking_by_year():
+  if 'year' in request.args:
+      year = int(request.args.get('year'))
+  else:
+      return jsonify({'Error' : 'Add year value as request argument'}), 400
+
+  output = ranking.get_overall_ranking(year)
+  return jsonify(output), 200
 
 
 @app.route('/api/indicator', methods=['GET'])
