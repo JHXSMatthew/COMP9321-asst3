@@ -112,7 +112,7 @@ class Calc_Indicator:
 
 
 CALC_INDICATORS = {
-    "CH4_to_CO2_Ratio": Calc_Indicator("CH4_to_CO2_Ratio", Calc_Indicator.ratio_lambda, ["CH4", "CO2"]),
+    "CH4_to_CO2_Ratio": Calc_Indicator("CH4_to_CO2_Ratio", (lambda x, y: x / y * 100), ["CH4", "CO2"]),
     "CO2_per_KCapita": Calc_Indicator("CO2_per_KCapita", Calc_Indicator.ratio_lambda, ["CO2", "Population"]),
     "GNI_per_KCapita": Calc_Indicator("GNI_per_KCapita", Calc_Indicator.ratio_lambda, ["GNI", "Population"])
 }
@@ -155,15 +155,14 @@ class Country(Document):
             'Name': self.Name
         }
 
+        print(start_year, end_year)
+
         if indicators is None or len(indicators) == 0:
             indicators = ALL_INDICATORS
 
         for i in indicators:
             if i in CALC_INDICATORS.keys():
                 params = {}
-
-        if indicators and len(indicators) > 0:
-            for i in indicators:
 
                 ind = CALC_INDICATORS[i]
 
@@ -176,7 +175,7 @@ class Country(Document):
                             params[param][year.Year] = year.Value
 
                 r[i] = []
-                year = start_year
+
 
 
                 has_results = True
@@ -187,6 +186,7 @@ class Country(Document):
                 if not has_results:
                     continue
 
+                year = start_year
                 while year <= end_year:
                     p = [params[p][year] for p in ind.params]
                     v = ind.run(p)

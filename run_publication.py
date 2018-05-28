@@ -10,8 +10,8 @@ from flask_cors import CORS
 
 from world_bank import create_countries_list
 
-# CONNECTION_STRING = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
-CONNECTION_STRING = 'mongodb://127.0.0.1:27017/test'
+CONNECTION_STRING = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+#CONNECTION_STRING = 'mongodb://127.0.0.1:27017/test'
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'comp9321_project'
@@ -31,14 +31,14 @@ cache_analysis = None
 @app.route('/analysis', methods=['GET'])
 def get_analysis():
     global cache_analysis
-    # if 'year' in request.args:
-    #     start_year = end_year = int(request.args.get('year'))
-    # elif 'start_year' in request.args and 'end_year' in request.args:
-    #     start_year = int(request.args.get('start_year'))
-    #     end_year = int(request.args.get('end_year'))
-    # else:
-    start_year = db_objects.STARTING_YEAR
-    end_year = db_objects.ENDING_YEAR
+    if 'year' in request.args:
+        start_year = end_year = int(request.args.get('year'))
+    elif 'start_year' in request.args and 'end_year' in request.args:
+        start_year = int(request.args.get('start_year'))
+        end_year = int(request.args.get('end_year'))
+    else:
+        start_year = db_objects.STARTING_YEAR
+        end_year = db_objects.ENDING_YEAR
         
     if not cache_analysis:
         if 'indicator' in request.args:
