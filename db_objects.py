@@ -95,7 +95,8 @@ class Indicators:
 
 
 ALL_INDICATORS = ["Population", "CO2", "CH4", "GNI", "GINI", "Agriculture_Percentage",
-                  "Renewable_Percentage", "Fossil_Fuel_Percentage"]
+                  "Renewable_Percentage", "Fossil_Fuel_Percentage", "CO4_to_CO2_Ratio", "CO2_per_KCapita",
+                  "GNI_per_KCapita"]
 
 class Calc_Indicator:
     ratio_lambda = lambda x, y: x / y
@@ -110,11 +111,11 @@ class Calc_Indicator:
 
 
 
-# CALC_INDICATORS = {
-#     "CO4_to_CO2_Ratio": [ratio_lambda],
-#     "CO2_per_KCapita": [ratio_lambda],
-#     "GNI_per_KCapita": [ratio_lambda]
-# }
+CALC_INDICATORS = {
+    "CO4_to_CO2_Ratio": [ratio_lambda],
+    "CO2_per_KCapita": [ratio_lambda],
+    "GNI_per_KCapita": [ratio_lambda]
+}
 
 
 class Year(EmbeddedDocument):
@@ -140,7 +141,7 @@ class Country(Document):
     Population = ListField(EmbeddedDocumentField(Year))
     CO2 = ListField(EmbeddedDocumentField(Year))
     CH4 = ListField(EmbeddedDocumentField(Year))
-    # CH4_CO2 = ListField(EmbeddedDocumentField(Year))
+    CH4_CO2 = ListField(EmbeddedDocumentField(Year))
     GNI = ListField(EmbeddedDocumentField(Year))
     GINI = ListField(EmbeddedDocumentField(Year))
     Agriculture_Percentage = ListField(EmbeddedDocumentField(Year))
@@ -157,7 +158,7 @@ class Country(Document):
 
         if indicators and len(indicators) > 0:
             for i in indicators:
-                # if i in CALC_INDICATORS.values():
+                if i in CALC_INDICATORS.values():
 
 
                 r[i] = [yr.to_dict() for yr in getattr(self, i) if start_year <= yr.Year <= end_year]
