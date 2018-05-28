@@ -1,14 +1,16 @@
 from flask import Flask, jsonify, request
 from mongoengine import connect
 import db_objects
+import five_number_summary
+import ranking
 from collections import OrderedDict
 import requests
 from flask_cors import CORS
 
 from world_bank import create_countries_list
 
-# CONNECTION_STRING = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
-CONNECTION_STRING = 'mongodb://127.0.0.1:27017/test'
+CONNECTION_STRING = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+# CONNECTION_STRING = 'mongodb://127.0.0.1:27017/test'
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'comp9321_project'
@@ -22,7 +24,7 @@ PUBLICATION_PORT = 9998
 ############################################################ Indicator Info ############################################
 
 
-co2 = {
+CO2 = {
     'Unit': 'kt',
     'Source': ' Carbon Dioxide Information Analysis Center, Environmental Sciences Division, '
               'Oak Ridge National Laboratory, Tennessee, United States.',
@@ -32,7 +34,7 @@ co2 = {
 
 }
 
-gni = {
+GNI = {
     'Unit': 'current US$',
     'Source': 'World Bank national accounts data, and OECD National Accounts data files.',
     'Definition': 'GNI per capita (formerly GNP per capita) is the gross national income, converted'
@@ -51,7 +53,7 @@ gni = {
                   'include the Euro area, Japan, the United Kingdom, and the United States.',
 }
 
-gini = {
+GINI = {
     'Unit': '%',
     'Source': 'World Bank, Development Research Group. Data are based on primary household survey data obtained '
               'from government statistical agencies and World Bank country departments.',
@@ -64,7 +66,7 @@ gini = {
                   ' a Gini index of 0 represents perfect equality, while an index of 100 implies perfect inequality.'
 }
 
-ch4 = {
+CH4 = {
     'Unit': 'kt',
     'Source': 'European Commission, Joint Research Centre ( JRC )/Netherlands Environmental Assessment Agency '
               '( PBL ). Emission Database for Global Atmospheric Research ( EDGAR )',
@@ -72,7 +74,7 @@ ch4 = {
                  'methane production.'
 }
 
-a_p = {
+Agriculture_Percentage = {
     'Unit': '% of land area',
     'Source': 'Food and Agriculture Organization, electronic files and web site',
     'Definition': 'Agricultural land refers to the share of land area that is arable, under permanent crops, '
@@ -87,7 +89,7 @@ a_p = {
                   'cultivated crops.'
 }
 
-r_p = {
+Renewable_Percentage = {
     'Unit': '% of total final energy consumption',
     'Souece': ' World Bank, Sustainable Energy for All ( SE4ALL ) database from the SE4ALL Global Tracking '
               'Framework led jointly by the World Bank, International Energy Agency, and the Energy Sector '
@@ -95,7 +97,7 @@ r_p = {
     'Definition': 'Renewable energy consumption is the share of renewables energy in total final energy consumption.'
 }
 
-population ={
+Population ={
     'Unit': 'Total',
     'Source': '( 1 ) United Nations Population Division. World Population Prospects: 2017 Revision. '
               '( 2 ) Census reports and other statistical publications from national statistical offices, '
@@ -107,7 +109,7 @@ population ={
                   'residents regardless of legal status or citizenship. The values shown are midyear estimates.'
 }
 
-f_f_p = {
+Fossil_Fuel_Percentage = {
     'Unit': '% of total',
     'Source': 'IEA Statistics ',
     'Definition': 'Fossil fuel comprises coal, oil, petroleum, and natural gas products.'
@@ -135,7 +137,7 @@ def get_all_countries():
                 'Country': country['Name'],	
             })	
         cache_country_list = jsonify({'result': output})
-    return 	cache_country_list
+    return cache_country_list
 	
 
 
@@ -185,6 +187,43 @@ def get_all_data():
         cache_all_country = jsonify({'result': output})
     return cache_all_country
 
+
+
+@app.route('/analysis/<indicator>', methods=['GET'])
+def get_summary_for_indicator(indicator):
+    if 'year' in request.args:
+        year = int(request.args.get('year'))
+    else:
+        return jsonify({'Error' : 'Add year value as request argument'}), 400
+
+    output = five_number_summary.get_five_num_sum(indicator, year)
+
+    return jsonify(output), 200
+
+
+@app.route('/analysis/<country>/<indicator>', methods=['GET'])
+def get_country_analysis(country, indicator):
+    if 'year' in request.args:
+        year = int(request.args.get('year'))
+    else:
+        return jsonify({'Error' : 'Add year value as request argument'}), 400
+
+    indicator_summary = five_number_summary.get_five_num_sum(indicator, year)
+
+    connect(
+        host='mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+    )
+
+    c = db_objects.Country.objects(Name=country)[0]
+    values_list = c.get_values_list(indicator, db_objects.STARTING_YEAR, db_objects.ENDING_YEAR)
+
+    year_index = five_number_summary.get_index(year)
+    value = values_list['data'][year_index]
+
+    percent_of_total = (value/indicator_summary['sum']) * 100
+
+    return jsonify({'Indicator': indicator, 'Year': year, 'percent_of_total':percent_of_total}), 200
+
 @app.route('/api/details/<indicator>', methods=['GET'])
 def get_indicator_details(indicator):
     output = []
@@ -197,6 +236,15 @@ def get_indicator_details(indicator):
     })
     return jsonify({'result': output})
 
+@app.route('/analysis/ranking/<indicator>', methods=['GET'])
+def get_ranking_by_year(indicator):
+   if 'year' in request.args:
+       year = int(request.args.get('year'))
+   else:
+       return jsonify({'Error' : 'Add year value as request argument'}), 400
+
+   output = ranking.get_ranking(indicator, year)
+   return jsonify(output), 200
 
 @app.route('/api/indicator', methods=['GET'])
 def get_indicator_list():
