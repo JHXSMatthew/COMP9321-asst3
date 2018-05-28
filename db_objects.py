@@ -186,7 +186,7 @@ class Country(Document):
                     continue
 
                 year = end_year
-                while year > start_year:
+                while year >= start_year:
 
                     if reduce((lambda x, y: x and y), map((lambda p: year in params[p]), ind.params)):
                         p = [params[p][year] for p in ind.params]
