@@ -127,6 +127,9 @@ class Country(Document):
     Agriculture_Percentage = ListField(EmbeddedDocumentField(Year))
     Renewable_Percentage = ListField(EmbeddedDocumentField(Year))
     Fossil_Fuel_Percentage = ListField(EmbeddedDocumentField(Year))
+    CO4_to_CO2_Ratio = ListField(EmbeddedDocumentField(Year))
+    CO2_per_KCapita = ListField(EmbeddedDocumentField(Year))
+    GNI_per_KCapita = ListField(EmbeddedDocumentField(Year))
 
     def __init__(self, *args, **kwargs):
         super(Country, self).__init__(*args, **kwargs)
@@ -139,6 +142,8 @@ class Country(Document):
 
         if indicators and len(indicators) > 0:
             for i in indicators:
+                ##########if i == CO4 to co2 ratio etc:
+
                 r[i] = [yr.to_dict() for yr in getattr(self, i) if start_year <= yr.Year <= end_year]
         else:
             for i in ALL_INDICATORS:
