@@ -53,12 +53,14 @@ def get_summary(start_year, end_year, indicators):
     for indicator in indicators:
         year_values = [[(v.Year, v.Value, country.Name) for v in getattr(country, indicator) if start_year <= v.Year <= end_year]
                        for country in db_objects.Country.objects if getattr(country, indicator) != []]
+
         results = {'indicator': indicator,
                    'summary': []}
 
         for years in list(zip(*year_values)):
             year = years[0][0]
             values = list(filter(lambda x: x != -1, [y[1] for y in years]))
+            country_count = len(values)
             if len(values) == 0:
                 values = [-1]
             print(values, year)
@@ -70,7 +72,8 @@ def get_summary(start_year, end_year, indicators):
             q1 = np.percentile(values, 25)
             q3 = np.percentile(values, 75)
             median_value = np.percentile(values, 50)
-            results['summary'].append({'year': year, 'min': min_value, 'q1': q1, 'median': median_value, 'q3': q3, 'max': max_value, 'sum': values_sum})
+            results['summary'].append({'year': year, 'min': min_value, 'q1': q1, 'median': median_value, 'q3': q3,
+                                       'max': max_value, 'sum': values_sum, 'average': values_sum/country_count})
 
         result.append(results)
     return result
