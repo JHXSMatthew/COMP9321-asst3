@@ -26,26 +26,29 @@ connect(
         host=CONNECTION_STRING
 )
 
+cache_analysis = None
 ############################################################### GET METHOD #############################################
 @app.route('/analysis', methods=['GET'])
 def get_analysis():
+    global cache_analysis
+    # if 'year' in request.args:
+    #     start_year = end_year = int(request.args.get('year'))
+    # elif 'start_year' in request.args and 'end_year' in request.args:
+    #     start_year = int(request.args.get('start_year'))
+    #     end_year = int(request.args.get('end_year'))
+    # else:
+    start_year = db_objects.STARTING_YEAR
+    end_year = db_objects.ENDING_YEAR
+        
+    if not cache_analysis:
+        if 'indicator' in request.args:
+            indicators = request.args.getlist('indicator')
 
-    if 'year' in request.args:
-        start_year = end_year = int(request.args.get('year'))
-    elif 'start_year' in request.args and 'end_year' in request.args:
-        start_year = int(request.args.get('start_year'))
-        end_year = int(request.args.get('end_year'))
-    else:
-        return {'err': "year/start_year/end_year required"}, 400
-    if 'indicator' in request.args:
-        indicators = request.args.getlist('indicator')
-
-        r = get_summary(start_year, end_year, indicators)
-    else:
-        r = get_summary(start_year, end_year, db_objects.ALL_INDICATORS)
-
-    return jsonify({
-        'result': r})
+            r = get_summary(start_year, end_year, indicators)
+        else:
+            r = get_summary(start_year, end_year, db_objects.ALL_INDICATORS)
+        cache_analysis = jsonify({'result': r})
+    return cache_analysis
 
 
 def get_summary(start_year, end_year, indicators):
@@ -75,8 +78,13 @@ def get_summary(start_year, end_year, indicators):
             q1 = np.percentile(values, 25)
             q3 = np.percentile(values, 75)
             median_value = np.percentile(values, 50)
+            average = 0
+            try:
+                average = values_sum/country_count
+            except:
+                pass
             results['summary'].append({'year': year, 'min': min_value, 'q1': q1, 'median': median_value, 'q3': q3,
-                                       'max': max_value, 'sum': values_sum, 'average': values_sum/country_count})
+                                       'max': max_value, 'sum': values_sum, 'average': average})
 
         result.append(results)
     return result
