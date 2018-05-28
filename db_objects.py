@@ -8,7 +8,7 @@ class Indicator:
     def __init__(self, name, url_name, unit, unit_detail, details):
         self.name = name
         self.url_name = name
-        if url_name is not "":
+        if url_name != "":
             self.url_name = url_name
         self.unit = unit
         self.unit_detail = unit_detail
