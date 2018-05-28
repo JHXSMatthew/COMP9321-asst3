@@ -163,17 +163,6 @@ def get_country_analysis(country, indicator):
 
     return jsonify({'Indicator': indicator, 'Year': year, 'percent_of_total':percent_of_total}), 200
 
-@app.route('/api/details', methods=['GET'])
-def get_indicator_details():
-    output = []
-
-    output.append({
-        'unit': eval(indicator)['Unit'],
-        'source': eval(indicator)['Source'],
-        'definition': eval(indicator)['Definition']
-
-    })
-    return jsonify({'result': output})
 
 @app.route('/analysis/ranking/<indicator>', methods=['GET'])
 def get_ranking_by_year(indicator):
@@ -184,6 +173,7 @@ def get_ranking_by_year(indicator):
 
    output = ranking.get_ranking(indicator, year)
    return jsonify(output), 200
+
 
 @app.route('/api/indicator', methods=['GET'])
 def get_indicator_list():
