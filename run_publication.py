@@ -206,8 +206,7 @@ def get_all_ranking_by_year():
 
   output = ranking.get_overall_ranking(year)
   return jsonify(output), 200
-
-
+  
 @app.route('/api/indicator', methods=['GET'])
 def get_indicator_list():
     return jsonify({'result': [getattr(db_objects.Indicators, indicator).to_dict() for indicator in db_objects.ALL_INDICATORS]})

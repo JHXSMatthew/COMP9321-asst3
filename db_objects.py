@@ -83,7 +83,7 @@ class Indicators:
                             "Fossil fuel comprises coal, oil, petroleum, and natural gas products."
                             )
 
-    CH4_to_CO2_Ratio = Indicator("CH4 to CO2 Ratio", "CO4_to_CO2_Ratio", "%", "", "Ratio of CH4 to CO2, indicator of "
+    CH4_to_CO2_Ratio = Indicator("CH4 to CO2 Ratio", "CH4_to_CO2_Ratio", "%", "", "Ratio of CH4 to CO2, indicator of "
                                                                                     "agricultural emmisions to other activities")
 
     CO2_per_KCapita = Indicator("CO2 per Thousand Persons", "CO2_per_KCapita", "kt/Person(k)", "kiloton per thousand persons",
@@ -185,8 +185,8 @@ class Country(Document):
                 if not has_results:
                     continue
 
-                year = start_year
-                while year <= end_year:
+                year = end_year
+                while year > start_year:
 
                     if reduce((lambda x, y: x and y), map((lambda p: year in params[p]), ind.params)):
                         p = [params[p][year] for p in ind.params]
@@ -194,7 +194,7 @@ class Country(Document):
                     else:
                         r[i].append({'year': year, 'value': -1})
 
-                    year += 1
+                    year -= 1
 
             else:
                 r[i] = [yr.to_dict() for yr in getattr(self, i) if start_year <= yr.Year <= end_year]
