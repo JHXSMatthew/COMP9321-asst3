@@ -54,8 +54,11 @@ def get_analysis():
 def get_summary(start_year, end_year, indicators):
     result = []
     for indicator in indicators:
-        year_values = [[(v.Year, v.Value, country.Name) for v in getattr(country, indicator) if start_year <= v.Year <= end_year]
-                       for country in db_objects.Country.objects if getattr(country, indicator) != []]
+        year_values = [country.to_dict([indicator], start_year, end_year)#[indicator]
+                       for country in db_objects.Country.objects]
+
+        year_values = [[tuple([v['year'], v['value'], c['Name']]) for v in c[indicator]] for c in year_values if c[indicator] != []]
+        print(year_values)
 
         results = {'indicator': indicator,
                    'summary': []}

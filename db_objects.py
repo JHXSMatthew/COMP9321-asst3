@@ -8,7 +8,7 @@ class Indicator:
     def __init__(self, name, url_name, unit, unit_detail, details):
         self.name = name
         self.url_name = name
-        if url_name is not "":
+        if url_name != "":
             self.url_name = url_name
         self.unit = unit
         self.unit_detail = unit_detail
@@ -82,7 +82,7 @@ class Indicators:
                             "Fossil fuel comprises coal, oil, petroleum, and natural gas products."
                             )
 
-    CO4_to_CO2_Ratio = Indicator("CO4 to CO2 Ratio", "CO4_to_CO2_Ratio", "%", "", "Ratio of CO4 to CO2, indicator of "
+    CH4_to_CO2_Ratio = Indicator("CH4 to CO2 Ratio", "CO4_to_CO2_Ratio", "%", "", "Ratio of Ch4 to CO2, indicator of "
                                                                                     "agricultural emmisions to other activities")
 
     CO2_per_KCapita = Indicator("CO2 per Thousand Persons", "CO2_per_KCapita", "kt/Person(k)", "kiloton per thousand persons",
@@ -98,6 +98,24 @@ ALL_INDICATORS = ["Population", "CO2", "CH4", "GNI", "GINI", "Agriculture_Percen
                   "Renewable_Percentage", "Fossil_Fuel_Percentage", "CO4_to_CO2_Ratio", "CO2_per_KCapita",
                   "GNI_per_KCapita"]
 
+class Calc_Indicator:
+    ratio_lambda = lambda x, y: x / y
+
+    def __init__(self, name, func, params=[]):
+        self.name = name
+        self.params = params
+        self.func = func
+
+    def run(self, params=[]):
+        return self.func(*params)
+
+
+
+CALC_INDICATORS = {
+    "CH4_to_CO2_Ratio": Calc_Indicator("CH4_to_CO2_Ratio", Calc_Indicator.ratio_lambda, ["CH4", "CO2"]),
+    "CO2_per_KCapita": Calc_Indicator("CO2_per_KCapita", Calc_Indicator.ratio_lambda, ["CO2", "Population"]),
+    "GNI_per_KCapita": Calc_Indicator("GNI_per_KCapita", Calc_Indicator.ratio_lambda, ["GNI", "Population"])
+}
 
 class Year(EmbeddedDocument):
     Year = IntField(required=True, primary_key=True)
@@ -122,7 +140,6 @@ class Country(Document):
     Population = ListField(EmbeddedDocumentField(Year))
     CO2 = ListField(EmbeddedDocumentField(Year))
     CH4 = ListField(EmbeddedDocumentField(Year))
-    CH4_CO2 = ListField(EmbeddedDocumentField(Year))
     GNI = ListField(EmbeddedDocumentField(Year))
     GINI = ListField(EmbeddedDocumentField(Year))
     Agriculture_Percentage = ListField(EmbeddedDocumentField(Year))
@@ -141,13 +158,46 @@ class Country(Document):
             'Name': self.Name
         }
 
+        if indicators is None or len(indicators) == 0:
+            indicators = ALL_INDICATORS
+
+        for i in indicators:
+            if i in CALC_INDICATORS.keys():
+                params = {}
+
         if indicators and len(indicators) > 0:
             for i in indicators:
-                ##########if i == CO4 to co2 ratio etc:
 
-                r[i] = [yr.to_dict() for yr in getattr(self, i) if start_year <= yr.Year <= end_year]
-        else:
-            for i in ALL_INDICATORS:
+                ind = CALC_INDICATORS[i]
+
+                for param in ind.params:
+                    params[param] = {}
+
+                for param in ind.params:
+                    for year in getattr(self, param):
+                        if start_year <= year.Year <= end_year:
+                            params[param][year.Year] = year.Value
+
+                r[i] = []
+                year = start_year
+
+
+                has_results = True
+                for p in params.values():
+                    if len(p) == 0:
+                        has_results = False
+                        break
+                if not has_results:
+                    continue
+
+                while year <= end_year:
+                    p = [params[p][year] for p in ind.params]
+                    v = ind.run(p)
+                    r[i].append({'year': year, 'value': v})
+
+                    year += 1
+
+            else:
                 r[i] = [yr.to_dict() for yr in getattr(self, i) if start_year <= yr.Year <= end_year]
 
         return r
@@ -169,6 +219,3 @@ class Country(Document):
         output = {'start_year': start_year, 'end_year': end_year, 'data': data}
 
         return output
-
-
-
