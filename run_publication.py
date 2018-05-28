@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from mongoengine import connect
 import db_objects
 import five_number_summary
+import ranking
 from collections import OrderedDict
 import requests
 from flask_cors import CORS
@@ -240,6 +241,14 @@ def get_country_analysis(country, indicator):
 
     return jsonify({'Indicator': indicator, 'Year': year, 'percent_of_total':percent_of_total}), 200
 
+@app.route('/analysis/ranking/<indicator>', methods=['GET'])
+def get_ranking_by_year(indicator):
+   if 'year' in request.args:
+       year = int(request.args.get('year'))
+   else:
+       return jsonify({'Error' : 'Add year value as request argument'}), 400
+
+   output = ranking.get_ranking(indicator, year)
 
 
 ############################################################### POST METHOD ############################################

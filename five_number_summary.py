@@ -1,6 +1,6 @@
 import db_objects
 from mongoengine import connect
-import np
+import numpy as np
 import statistics
 
 def get_index(year):
