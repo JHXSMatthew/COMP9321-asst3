@@ -82,7 +82,7 @@ class Indicators:
                             "Fossil fuel comprises coal, oil, petroleum, and natural gas products."
                             )
 
-    CH4_to_CO2_Ratio = Indicator("CH4 to CO2 Ratio", "CO4_to_CO2_Ratio", "%", "", "Ratio of Ch4 to CO2, indicator of "
+    CH4_to_CO2_Ratio = Indicator("CH4 to CO2 Ratio", "CO4_to_CO2_Ratio", "%", "", "Ratio of CH4 to CO2, indicator of "
                                                                                     "agricultural emmisions to other activities")
 
     CO2_per_KCapita = Indicator("CO2 per Thousand Persons", "CO2_per_KCapita", "kt/Person(k)", "kiloton per thousand persons",
@@ -145,9 +145,6 @@ class Country(Document):
     Agriculture_Percentage = ListField(EmbeddedDocumentField(Year))
     Renewable_Percentage = ListField(EmbeddedDocumentField(Year))
     Fossil_Fuel_Percentage = ListField(EmbeddedDocumentField(Year))
-    CO4_to_CO2_Ratio = ListField(EmbeddedDocumentField(Year))
-    CO2_per_KCapita = ListField(EmbeddedDocumentField(Year))
-    GNI_per_KCapita = ListField(EmbeddedDocumentField(Year))
 
     def __init__(self, *args, **kwargs):
         super(Country, self).__init__(*args, **kwargs)

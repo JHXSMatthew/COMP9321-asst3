@@ -100,7 +100,7 @@ def get_all_countries():
         for country in db_objects.Country.objects:	
             output.append({	
                 'id': country['id'],	
-                'Country': country['Name'],	
+                'Country': country['Name']
             })	
         cache_country_list = jsonify({'result': output})
     return cache_country_list
