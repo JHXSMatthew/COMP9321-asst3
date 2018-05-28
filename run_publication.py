@@ -126,7 +126,7 @@ cache_country_list = None
 def get_all_countries():
     # Return all countries in MongoDB database	
     global cache_country_list
-    
+
     if not cache_country_list:
         output = []	
         for country in db_objects.Country.objects:	
@@ -169,27 +169,21 @@ def hello_world():
     return 'Hello World!'
 
 
+cache_all_country = None
 @app.route('/api/all', methods=['GET'])
 def get_all_data():
+    global cache_all_country
     # Return all countries data in MongoDB database
     connect(
         host=CONNECTION_STRING
     )
 
-    output = []
-    for country in db_objects.Country.objects:
-        output.append({
-            'Name': country['Name'],
-            'Population': country['Population'],
-            'CO2': country['CO2'],
-            'CH4': country['CH4'],
-            'GNI': country['GNI'],
-            'GINI': country['GINI'],
-            'Agriculture_Percentage': country['Agriculture_Percentage'],
-            'Renewable_Percentage': country['Renewable_Percentage'],
-            'Fossil_Fuel_Percentage': country['Fossil_Fuel_Percentage']
-        })
-    return jsonify({'result': output})
+    if not cache_all_country:
+        output = []
+        for country in db_objects.Country.objects:
+            output.append(country.to_dict([],db_objects.STARTING_YEAR,db_objects.ENDING_YEAR))
+        cache_all_country = jsonify({'result': output})
+    return cache_all_country
 
 @app.route('/api/details/<indicator>', methods=['GET'])
 def get_indicator_details(indicator):
@@ -204,6 +198,9 @@ def get_indicator_details(indicator):
     return jsonify({'result': output})
 
 
+@app.route('/api/indicator', methods=['GET'])
+def get_indicator_list():
+    return jsonify({'result': db_objects.ALL_INDICATORS})
 
 ############################################################### POST METHOD ############################################
 
