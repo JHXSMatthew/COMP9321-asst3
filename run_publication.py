@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request
 from mongoengine import connect
 import db_objects
 import numpy as np
-import five_number_summary
 import ranking
 from collections import OrderedDict
 import requests
