@@ -29,7 +29,6 @@ connect(
 ############################################################### GET METHOD #############################################
 @app.route('/analysis', methods=['GET'])
 def get_analysis():
-    #c = db_objects.Country.objects(Name=country)[0]
 
     if 'year' in request.args:
         start_year = end_year = int(request.args.get('year'))
@@ -39,32 +38,36 @@ def get_analysis():
     if 'indicator' in request.args:
         indicators = request.args.getlist('indicator')
 
-        get_sum(indicators)
+        r = get_summary(indicators)
+    else:
+        r = get_summary(db_objects.ALL_INDICATORS)
 
-    # return jsonify({
-    #     'result': c.to_dict(indicators, start_year, end_year)})
+    return jsonify({
+        'result': r})
 
 
-def get_sum(indicators):
-    #print(db_objects.Country.objects(Name="Taiwan, China")[0].Population == [])
+def get_summary(indicators):
+    result = []
+    for indicator in indicators:
+        year_values = [[(v.Year, v.Value, country.Name) for v in getattr(country, indicator) if v.Value != -1] for country in db_objects.Country.objects if country.Population != []]
+        results = {'indicator': indicator,
+                   'summary': []}
 
-    year_values = [[(v.Year, v.Value, country.Name) for v in country.Population] for country in db_objects.Country.objects if country.Population != []]
-    results = []
+        for years in list(zip(*year_values)):
+            year = years[0][0]
+            values = [y[1] for y in years]
+            print(values)
+            values_sum = sum(values)
+            values.sort()
+            min_value = values[0]
+            max_value = values[len(values) - 1]
+            q1 = np.percentile(values, 25)
+            q3 = np.percentile(values, 75)
+            median_value = np.percentile(values, 50)
+            results['summary'].append({'year': year, 'min': min_value, 'q1': q1, 'median': median_value, 'q3': q3, 'max': max_value, 'sum': values_sum})
 
-    for years in list(zip(*year_values)):
-        year = years[0][0]
-        values = [y[1] for y in years]
-        print(values)
-        values_sum = sum(values)
-        values.sort()
-        min_value = values[0]
-        max_value = values[len(values) - 1]
-        q1 = np.percentile(values, 25)
-        q3 = np.percentile(values, 75)
-        median_value = np.percentile(values, 50)
-        results.append({'year': year, 'min': min_value, 'q1': q1, 'median': median_value, 'q3': q3, 'max': max_value})
-
-    print (results)
+        result.append(results)
+    return result
 
 cache_country_list = None
 @app.route('/api/countries', methods=['GET'])	
@@ -128,40 +131,40 @@ def get_all_data():
 
 
 
-@app.route('/analysis/<indicator>', methods=['GET'])
-def get_summary_for_indicator(indicator):
-    if 'year' in request.args:
-        year = int(request.args.get('year'))
-    else:
-        return jsonify({'Error' : 'Add year value as request argument'}), 400
-
-    output = five_number_summary.get_five_num_sum(indicator, year)
-
-    return jsonify(output), 200
-
-
-@app.route('/analysis/<country>/<indicator>', methods=['GET'])
-def get_country_analysis(country, indicator):
-    if 'year' in request.args:
-        year = int(request.args.get('year'))
-    else:
-        return jsonify({'Error' : 'Add year value as request argument'}), 400
-
-    indicator_summary = five_number_summary.get_five_num_sum(indicator, year)
-
-    connect(
-        host='mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
-    )
-
-    c = db_objects.Country.objects(Name=country)[0]
-    values_list = c.get_values_list(indicator, db_objects.STARTING_YEAR, db_objects.ENDING_YEAR)
-
-    year_index = five_number_summary.get_index(year)
-    value = values_list['data'][year_index]
-
-    percent_of_total = (value/indicator_summary['sum']) * 100
-
-    return jsonify({'Indicator': indicator, 'Year': year, 'percent_of_total':percent_of_total}), 200
+# @app.route('/analysis/<indicator>', methods=['GET'])
+# def get_summary_for_indicator(indicator):
+#     if 'year' in request.args:
+#         year = int(request.args.get('year'))
+#     else:
+#         return jsonify({'Error' : 'Add year value as request argument'}), 400
+#
+#     output = five_number_summary.get_five_num_sum(indicator, year)
+#
+#     return jsonify(output), 200
+#
+#
+# @app.route('/analysis/<country>/<indicator>', methods=['GET'])
+# def get_country_analysis(country, indicator):
+#     if 'year' in request.args:
+#         year = int(request.args.get('year'))
+#     else:
+#         return jsonify({'Error' : 'Add year value as request argument'}), 400
+#
+#     indicator_summary = five_number_summary.get_five_num_sum(indicator, year)
+#
+#     connect(
+#         host='mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+#     )
+#
+#     c = db_objects.Country.objects(Name=country)[0]
+#     values_list = c.get_values_list(indicator, db_objects.STARTING_YEAR, db_objects.ENDING_YEAR)
+#
+#     year_index = five_number_summary.get_index(year)
+#     value = values_list['data'][year_index]
+#
+#     percent_of_total = (value/indicator_summary['sum']) * 100
+#
+#     return jsonify({'Indicator': indicator, 'Year': year, 'percent_of_total':percent_of_total}), 200
 
 
 @app.route('/analysis/ranking/<indicator>', methods=['GET'])

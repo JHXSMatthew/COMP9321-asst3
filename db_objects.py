@@ -16,10 +16,10 @@ class Indicator:
 
     def to_dict(self):
         return {
-            'name': self.name,
-            'unit': self.unit,
-            'unit_detail': self.unit_detail,
-            'details': self.details
+            'Name': self.name,
+            'Unit': self.unit,
+            'Unit_detail': self.unit_detail,
+            'Details': self.details
         }
 
 class Indicators:
