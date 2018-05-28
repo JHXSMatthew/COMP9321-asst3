@@ -16,7 +16,7 @@ CONNECTION_STRING = 'mongodb://127.0.0.1:27017/test2'
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'comp9321_project'
 app.config['MONGO_URI'] = CONNECTION_STRING
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 PUBLICATION_URL = "https://127.0.0.1"
 PUBLICATION_PORT = 9998
