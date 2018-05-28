@@ -24,6 +24,8 @@ class Indicators:
     FOSSIL_FUEL = Indicator("Fossil Fuel Energy Consumption", "Fossil_Fuel_Percentage", "% of total final energy consumption", "NA")
 
 
+
+
 ALL_INDICATORS = ["Population", "CO2", "CH4", "GNI", "GINI", "Agriculture_Percentage",
                   "Renewable_Percentage", "Fossil_Fuel_Percentage"]
 
