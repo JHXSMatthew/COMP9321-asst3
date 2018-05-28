@@ -1,14 +1,15 @@
 from flask import Flask, jsonify, request
 from mongoengine import connect
 import db_objects
+import numpy as np
 from collections import OrderedDict
 import requests
 from flask_cors import CORS
 
 from world_bank import create_countries_list
 
-# CONNECTION_STRING = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
-CONNECTION_STRING = 'mongodb://127.0.0.1:27017/test'
+CONNECTION_STRING = 'mongodb://mcgradyhaha:Mac2813809@ds231360.mlab.com:31360/comp9321_project'
+# CONNECTION_STRING = 'mongodb://127.0.0.1:27017/test'
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'comp9321_project'
@@ -20,71 +21,10 @@ PUBLICATION_PORT = 9998
 
 
 ############################################################ Indicator Info ############################################
-
-
-co2 = {
-    'Unit': 'kt',
-    'Source': ' Carbon Dioxide Information Analysis Center, Environmental Sciences Division, '
-              'Oak Ridge National Laboratory, Tennessee, United States.',
-    'Definition': 'Carbon dioxide emissions are those stemming from the burning of fossil fuels '
-                  'and the manufacture of cement. They include carbon dioxide produced during '
-                  'consumption of solid, liquid, and gas fuels and gas flaring.'
-
-}
-
-gni = {
-    'Unit': 'current US$',
-    'Source': 'World Bank national accounts data, and OECD National Accounts data files.',
-    'Definition': 'GNI per capita (formerly GNP per capita) is the gross national income, converted'
-                  ' to U.S. dollars using the World Bank Atlas method, divided by the midyear population.'
-                  ' GNI is the sum of value added by all resident producers plus any product taxes (less '
-                  'subsidies) not included in the valuation of output plus net receipts of primary income '
-                  '(compensation of employees and property income) from abroad. GNI, calculated in national'
-                  ' currency, is usually converted to U.S. dollars at official exchange rates for comparisons'
-                  ' across economies, although an alternative rate is used when the official exchange rate is'
-                  ' judged to diverge by an exceptionally large margin from the rate actually applied in'
-                  ' international transactions. To smooth fluctuations in prices and exchange rates, a special'
-                  ' Atlas method of conversion is used by the World Bank. This applies a conversion factor that '
-                  'averages the exchange rate for a given year and the two preceding years, adjusted for differences'
-                  ' in rates of inflation between the country, and through 2000, the G-5 countries (France,'
-                  ' Germany, Japan, the United Kingdom, and the United States). From 2001, these countries '
-                  'include the Euro area, Japan, the United Kingdom, and the United States.',
-}
-
-gini = {
-    'Unit': '%',
-    'Source': 'World Bank, Development Research Group. Data are based on primary household survey data obtained '
-              'from government statistical agencies and World Bank country departments.',
-    'Definition': 'Gini index measures the extent to which the distribution of income (or, in some cases, '
-                  'consumption expenditure) among individuals or households within an economy deviates from a'
-                  ' perfectly equal distribution. A Lorenz curve plots the cumulative percentages of total income '
-                  'received against the cumulative number of recipients, starting with the poorest individual '
-                  'or household. The Gini index measures the area between the Lorenz curve and a hypothetical '
-                  'line of absolute equality, expressed as a percentage of the maximum area under the line. Thus'
-                  ' a Gini index of 0 represents perfect equality, while an index of 100 implies perfect inequality.'
-}
-
-ch4 = {
-    'Unit': 'kt',
-    'Source': 'European Commission, Joint Research Centre ( JRC )/Netherlands Environmental Assessment Agency '
-              '( PBL ). Emission Database for Global Atmospheric Research ( EDGAR )',
-    'Definition': 'Methane emissions are those stemming from human activities such as agriculture and from industrial '
-                 'methane production.'
-}
-
 a_p = {
     'Unit': '% of land area',
     'Source': 'Food and Agriculture Organization, electronic files and web site',
-    'Definition': 'Agricultural land refers to the share of land area that is arable, under permanent crops, '
-                  'and under permanent pastures. Arable land includes land defined by the FAO as land under '
-                  'temporary crops (double-cropped areas are counted once), temporary meadows for mowing or for '
-                  'pasture, land under market or kitchen gardens, and land temporarily fallow. Land abandoned as'
-                  ' a result of shifting cultivation is excluded. Land under permanent crops is land cultivated '
-                  'with crops that occupy the land for long periods and need not be replanted after each harvest,'
-                  ' such as cocoa, coffee, and rubber. This category includes land under flowering shrubs, '
-                  'fruit trees, nut trees, and vines, but excludes land under trees grown for wood or timber. '
-                  'Permanent pasture is land used for five or more years for forage, including natural and '
-                  'cultivated crops.'
+    'Definition':
 }
 
 r_p = {
@@ -92,7 +32,7 @@ r_p = {
     'Souece': ' World Bank, Sustainable Energy for All ( SE4ALL ) database from the SE4ALL Global Tracking '
               'Framework led jointly by the World Bank, International Energy Agency, and the Energy Sector '
               'Management Assistance Program.',
-    'Definition': 'Renewable energy consumption is the share of renewables energy in total final energy consumption.'
+    'Definition':
 }
 
 population ={
@@ -103,14 +43,13 @@ population ={
               '( 4 ) United Nations Statistical Division. Population and Vital Statistics Reprot ( various years ), '
               '( 5 ) U.S. Census Bureau: International Database, and '
               '( 6 ) Secretariat of the Pacific Community: Statistics and Demography Programme.',
-    'Definition': 'Total population is based on the de facto definition of population, which counts all '
-                  'residents regardless of legal status or citizenship. The values shown are midyear estimates.'
+    'Definition':
 }
 
 f_f_p = {
     'Unit': '% of total',
     'Source': 'IEA Statistics ',
-    'Definition': 'Fossil fuel comprises coal, oil, petroleum, and natural gas products.'
+    'Definition':
 }
 
 
@@ -120,11 +59,49 @@ connect(
 )
 
 ############################################################### GET METHOD #############################################
+@app.route('/analysis', methods=['GET'])
+def get_analysis():
+    #c = db_objects.Country.objects(Name=country)[0]
+
+    if 'year' in request.args:
+        start_year = end_year = int(request.args.get('year'))
+    elif 'start_year' in request.args and 'end_year' in request.args:
+        start_year = int(request.args.get('start_year'))
+        end_year = int(request.args.get('end_year'))
+    if 'indicator' in request.args:
+        indicators = request.args.getlist('indicator')
+
+        get_sum(indicators)
+
+    # return jsonify({
+    #     'result': c.to_dict(indicators, start_year, end_year)})
+
+
+def get_sum(indicators):
+    #print(db_objects.Country.objects(Name="Taiwan, China")[0].Population == [])
+
+    year_values = [[(v.Year, v.Value, country.Name) for v in country.Population] for country in db_objects.Country.objects if country.Population != []]
+    results = []
+
+    for years in list(zip(*year_values)):
+        year = years[0][0]
+        values = [y[1] for y in years]
+        print(values)
+        values_sum = sum(values)
+        values.sort()
+        min_value = values[0]
+        max_value = values[len(values) - 1]
+        q1 = np.percentile(values, 25)
+        q3 = np.percentile(values, 75)
+        median_value = np.percentile(values, 50)
+        results.append({'year': year, 'min': min_value, 'q1': q1, 'median': median_value, 'q3': q3, 'max': max_value})
+
+    print (results)
 
 cache_country_list = None
 @app.route('/api/countries', methods=['GET'])	
 def get_all_countries():
-    # Return all countries in MongoDB database	
+    # Return all countries in MongoDB database
     global cache_country_list
     
     if not cache_country_list:
@@ -141,9 +118,9 @@ def get_all_countries():
 
 @app.route('/api/<string:country>', methods=['GET'])
 def get_indicator(country):
-    connect(
-        host=CONNECTION_STRING
-    )
+    # connect(
+    #     host=CONNECTION_STRING
+    # )
 
     c = db_objects.Country.objects(Name=country)[0]
 
@@ -164,17 +141,13 @@ def get_indicator(country):
     return jsonify({
         'result': c.to_dict(indicators, start_year, end_year)})
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
-
 
 @app.route('/api/all', methods=['GET'])
 def get_all_data():
     # Return all countries data in MongoDB database
-    connect(
-        host=CONNECTION_STRING
-    )
+    # connect(
+    #     host=CONNECTION_STRING
+    # )
 
     output = []
     for country in db_objects.Country.objects:
@@ -191,8 +164,8 @@ def get_all_data():
         })
     return jsonify({'result': output})
 
-@app.route('/api/details/<indicator>', methods=['GET'])
-def get_indicator_details(indicator):
+@app.route('/api/details', methods=['GET'])
+def get_indicator_details():
     output = []
 
     output.append({
@@ -218,9 +191,9 @@ def download_data():
     # Get NASA data
 
     # Add to mongoDB database
-    connect(
-        host=CONNECTION_STRING
-    )
+    # connect(
+    #     host=CONNECTION_STRING
+    # )
     for country in countries:
         country.save()
     return 'Hello World!'
